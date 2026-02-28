@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Void — Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-mark">✦</div>
+      Void
+    </div>
+    <div class="topbar-center">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search" type="text" id="search-input" placeholder="Search notes...">
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" title="Toggle panel" onclick="togglePanel()">⊟</div>
+      <div class="icon-btn" title="Export as Markdown" onclick="exportNote()">↗</div>
+      <div class="avatar">JD</div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <nav class="sidebar">
+      <div class="sidebar-top">
+        <button class="new-note-btn" onclick="newNote()">
+          <span>✦</span> New Note
+        </button>
+      </div>
+      <div class="sidebar-section">Notes</div>
+      <div class="sidebar-list" id="note-list"></div>
+      <div class="sidebar-bottom">
+        <div class="nav-link">⊞ &nbsp;All Notes</div>
+        <div class="nav-link">⭒ &nbsp;Starred</div>
+        <div class="nav-link">⊘ &nbsp;Trash</div>
+      </div>
+    </nav>
+
+    <!-- ═══ EDITOR ═══ -->
+    <div class="editor-wrap">
+
+      <div class="editor-toolbar">
+        <button class="tb-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+        <button class="tb-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+        <button class="tb-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="insertMd('# ')">H1</button>
+        <button class="tb-btn" onclick="insertMd('## ')">H2</button>
+        <button class="tb-btn" onclick="insertMd('- ')">List</button>
+        <button class="tb-btn" onclick="insertMd('> ')">Quote</button>
+        <button class="tb-btn" onclick="insertMd('`')">Code</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="saveNote()" title="Save (Ctrl+S)">💾 Save</button>
+        <button class="tb-btn" onclick="deleteCurrentNote()" style="color:#f72585" title="Delete note">🗑</button>
+        <select class="tb-tag-select" id="tag-select" onchange="changeTag(this.value)">
+          <option value="work">Work</option>
+          <option value="idea">Idea</option>
+          <option value="personal">Personal</option>
+          <option value="design">Design</option>
+        </select>
+        <span class="word-count" id="word-count">0 words</span>
+      </div>
+
+      <div class="editor-main" id="editor-area">
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-glyph">✦</div>
+          <div class="empty-title">No note selected</div>
+          <div class="empty-sub">Create a new note or pick one from the sidebar</div>
+        </div>
+
+        <!-- Editor fields (hidden until a note is opened) -->
+        <div id="editor-fields" style="display:none; flex-direction:column; flex:1;">
+          <input id="note-title" type="text" placeholder="Untitled note…" oninput="onEdit()">
+          <div class="editor-meta">
+            <span class="editor-date" id="editor-date"></span>
+            <span class="editor-tag-badge" id="editor-tag-badge"></span>
+          </div>
+          <textarea id="note-body" placeholder="Start writing… your thoughts live here." oninput="onEdit()"></textarea>
+        </div>
+      </div>
+
+      <div class="statusbar">
+        <div class="status-item"><span class="status-dot"></span> Synced</div>
+        <div class="status-item" id="status-chars">0 chars</div>
+        <div class="status-item" id="status-lines">0 lines</div>
+      </div>
+
+    </div><!-- /editor-wrap -->
+
+    <!-- ═══ RIGHT PANEL ═══ -->
+    <aside class="right-panel" id="right-panel">
+
+      <div>
+        <div class="panel-section-title">Writing Activity</div>
+        <div class="heatmap" id="heatmap"></div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-top:8px;">Last 5 weeks</div>
+      </div>
+
+      <div>
+        <div class="panel-section-title">Stats</div>
+        <div class="stat-row">
+          <span class="stat-label">Total notes</span>
+          <span class="stat-val" id="stat-notes">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Total words</span>
+          <span class="stat-val" id="stat-words">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Tags used</span>
+          <span class="stat-val">4</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Streak</span>
+          <span class="stat-val" style="color:var(--gold)">🔥 3 days</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-title">Tags</div>
+        <div class="tag-cloud">
+          <div class="tag-chip tag-work"     onclick="filterTag('work')">work</div>
+          <div class="tag-chip tag-idea"     onclick="filterTag('idea')">idea</div>
+          <div class="tag-chip tag-personal" onclick="filterTag('personal')">personal</div>
+          <div class="tag-chip tag-design"   onclick="filterTag('design')">design</div>
+          <div class="tag-chip"              onclick="filterTag(null)">all</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-title">Recent</div>
+        <div id="recent-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+    </aside>
+
+  </div><!-- /shell -->
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast">✓ &nbsp;Note saved</div>
+
+  <script>
+    // ═══════════════════════════════════════
+    // DATA
+    // ═══════════════════════════════════════
+    const TAG_CLASSES = {
+      work: 'tag-work', idea: 'tag-idea',
+      personal: 'tag-personal', design: 'tag-design'
+    };
+    const TAG_COLORS = {
+      work: '#c77dff', idea: '#00f5d4',
+      personal: '#ffbe0b', design: '#f72585'
+    };
+    const TAG_BG = {
+      work: 'rgba(155,93,229,0.15)', idea: 'rgba(0,245,212,0.1)',
+      personal: 'rgba(255,190,11,0.1)', design: 'rgba(247,37,133,0.1)'
+    };
+
+    let notes = [
+      {
+        id: 1, tag: 'work',
+        title: 'Q1 Product Roadmap',
+        body: 'Key priorities for Q1:\n\n- Launch redesigned onboarding flow\n- Integrate new analytics pipeline\n- Ship mobile beta to top 500 users\n- Reduce churn by improving day-7 retention hooks\n\nNotes from last sync with PM team: focus on core loop before feature expansion.',
+        updated: Date.now() - 86400000 * 2
+      },
+      {
+        id: 2, tag: 'idea',
+        title: 'Idea: Ambient Music App',
+        body: 'An app that generates ambient soundscapes based on your current context — time of day, weather, calendar (focus block vs. free time).\n\nTechnically feasible with a small generative audio model. Could layer static loops with dynamic elements.\n\nMonetize via a subscription to premium sound packs.',
+        updated: Date.now() - 86400000 * 5
+      },
+      {
+        id: 3, tag: 'design',
+        title: 'Design System Notes',
+        body: 'Principles:\n\n1. Every component must work in isolation and in composition\n2. Tokens > hardcoded values everywhere\n3. Motion should feel intentional — never decorative\n\nOpen questions: how do we handle dark/light toggling with the new token layer?',
+        updated: Date.now() - 3600000
+      },
+      {
+        id: 4, tag: 'personal',
+        title: 'Journal — Feb 2026',
+        body: "Slow morning. Made coffee, read for an hour. The kind of day where it feels like the world is moving in slow motion and that's not a bad thing.\n\nThinking a lot about what I want the next chapter to look like. Less reactive, more intentional.",
+        updated: Date.now() - 7200000
+      }
+    ];
+
+    let activeId    = null;
+    let saveTimer   = null;
+    let filterTagVal = null;
+
+    function uid() { return Date.now() + Math.random(); }
+
+    // ═══════════════════════════════════════
+    // RENDER
+    // ═══════════════════════════════════════
+    function renderList() {
+      const list = document.getElementById('note-list');
+      const q    = document.getElementById('search-input').value.toLowerCase();
+
+      const filtered = notes
+        .filter(n => {
+          const matchQ   = !q || n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q);
+          const matchTag = !filterTagVal || n.tag === filterTagVal;
+          return matchQ && matchTag;
+        })
+        .sort((a, b) => b.updated - a.updated);
+
+      list.innerHTML = '';
+      filtered.forEach((note, i) => {
+        const el = document.createElement('div');
+        el.className = 'note-item' + (note.id === activeId ? ' active' : '');
+        el.style.animationDelay = (i * 0.04) + 's';
+        el.dataset.id = note.id;
+
+        const preview = note.body.replace(/\n/g, ' ').slice(0, 60);
+        el.innerHTML = `
+          <div class="note-item-tag ${TAG_CLASSES[note.tag]}">${note.tag}</div>
+          <div class="note-item-title">${note.title || 'Untitled'}</div>
+          <div class="note-item-preview">${preview || 'No content yet…'}</div>
+          <div class="note-item-meta"><span>${timeAgo(note.updated)}</span></div>
+        `;
+        el.onclick = () => openNote(note.id);
+        list.appendChild(el);
+      });
+
+      updateStats();
+      renderRecent();
+    }
+
+    function openNote(id) {
+      activeId = id;
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+
+      document.getElementById('empty-state').style.display  = 'none';
+      const fields = document.getElementById('editor-fields');
+      fields.style.display = 'flex';
+
+      document.getElementById('note-title').value  = note.title;
+      document.getElementById('note-body').value   = note.body;
+      document.getElementById('tag-select').value  = note.tag;
+
+      updateEditorMeta(note);
+      updateWordCount();
+      renderList();
+    }
+
+    function updateEditorMeta(note) {
+      document.getElementById('editor-date').textContent =
+        new Date(note.updated).toLocaleDateString('en-US', {
+          weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+        });
+      const badge = document.getElementById('editor-tag-badge');
+      badge.textContent      = note.tag;
+      badge.style.background = TAG_BG[note.tag];
+      badge.style.color      = TAG_COLORS[note.tag];
+    }
+
+    // ═══════════════════════════════════════
+    // EDITING
+    // ═══════════════════════════════════════
+    function onEdit() {
+      if (!activeId) return;
+      const note = notes.find(n => n.id === activeId);
+      if (!note) return;
+
+      note.title   = document.getElementById('note-title').value;
+      note.body    = document.getElementById('note-body').value;
+      note.updated = Date.now();
+
+      updateEditorMeta(note);
+      updateWordCount();
+      renderList();
+
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => showToast('Auto-saved'), 2000);
+    }
+
+    function changeTag(val) {
+      if (!activeId) return;
+      const note = notes.find(n => n.id === activeId);
+      if (!note) return;
+      note.tag     = val;
+      note.updated = Date.now();
+      updateEditorMeta(note);
+      renderList();
+    }
+
+    function updateWordCount() {
+      const body  = document.getElementById('note-body').value;
+      const title = document.getElementById('note-title').value;
+      const full  = (title + ' ' + body).trim();
+      const words = full ? full.split(/\s+/).length : 0;
+      document.getElementById('word-count').textContent    = words + ' words';
+      document.getElementById('status-chars').textContent  = body.length + ' chars';
+      document.getElementById('status-lines').textContent  = body.split('\n').length + ' lines';
+    }
+
+    // ═══════════════════════════════════════
+    // NEW / DELETE
+    // ═══════════════════════════════════════
+    function newNote() {
+      const note = { id: uid(), title: '', tag: 'idea', body: '', updated: Date.now() };
+      notes.unshift(note);
+      renderList();
+      openNote(note.id);
+      setTimeout(() => document.getElementById('note-title').focus(), 50);
+    }
+
+    function deleteCurrentNote() {
+      if (!activeId) return;
+      if (!confirm('Delete this note?')) return;
+      notes    = notes.filter(n => n.id !== activeId);
+      activeId = null;
+      document.getElementById('empty-state').style.display  = 'flex';
+      document.getElementById('editor-fields').style.display = 'none';
+      renderList();
+      showToast('Note deleted', true);
+    }
+
+    // ═══════════════════════════════════════
+    // SAVE / EXPORT
+    // ═══════════════════════════════════════
+    function saveNote() {
+      if (!activeId) return;
+      onEdit();
+      showToast('Note saved');
+    }
+
+    function exportNote() {
+      if (!activeId) return;
+      const note    = notes.find(n => n.id === activeId);
+      if (!note) return;
+      const content = `# ${note.title}\n\n${note.body}`;
+      const blob    = new Blob([content], { type: 'text/markdown' });
+      const a       = document.createElement('a');
+      a.href        = URL.createObjectURL(blob);
+      a.download    = (note.title || 'note') + '.md';
+      a.click();
+    }
+
+    // ═══════════════════════════════════════
+    // FORMATTING
+    // ═══════════════════════════════════════
+    function fmt(cmd) {
+      const ta    = document.getElementById('note-body');
+      const start = ta.selectionStart;
+      const end   = ta.selectionEnd;
+      const sel   = ta.value.slice(start, end);
+      const wrap  = { bold: '**', italic: '_', underline: '__' }[cmd];
+      ta.value    = ta.value.slice(0, start) + wrap + sel + wrap + ta.value.slice(end);
+      ta.focus();
+      ta.setSelectionRange(start + wrap.length, end + wrap.length);
+      onEdit();
+    }
+
+    function insertMd(prefix) {
+      const ta        = document.getElementById('note-body');
+      const pos       = ta.selectionStart;
+      const lineStart = ta.value.lastIndexOf('\n', pos - 1) + 1;
+      ta.value        = ta.value.slice(0, lineStart) + prefix + ta.value.slice(lineStart);
+      ta.focus();
+      const newPos    = lineStart + prefix.length + (pos - lineStart);
+      ta.setSelectionRange(newPos, newPos);
+      onEdit();
+    }
+
+    // ═══════════════════════════════════════
+    // PANEL TOGGLE
+    // ═══════════════════════════════════════
+    function togglePanel() {
+      const p = document.getElementById('right-panel');
+      if (p.style.width === '0px') {
+        p.style.width   = '220px';
+        p.style.padding = '';
+        p.style.overflow = '';
+      } else {
+        p.style.width    = '0px';
+        p.style.padding  = '0';
+        p.style.overflow = 'hidden';
+      }
+    }
+
+    // ═══════════════════════════════════════
+    // FILTER / SEARCH
+    // ═══════════════════════════════════════
+    document.getElementById('search-input').addEventListener('input', renderList);
+
+    function filterTag(tag) {
+      filterTagVal = tag;
+      renderList();
+    }
+
+    // ═══════════════════════════════════════
+    // STATS
+    // ═══════════════════════════════════════
+    function updateStats() {
+      document.getElementById('stat-notes').textContent = notes.length;
+      const totalWords = notes.reduce((acc, n) => {
+        const full = (n.title + ' ' + n.body).trim();
+        return acc + (full ? full.split(/\s+/).length : 0);
+      }, 0);
+      document.getElementById('stat-words').textContent = totalWords.toLocaleString();
+    }
+
+    function renderRecent() {
+      const el     = document.getElementById('recent-list');
+      const recent = [...notes].sort((a, b) => b.updated - a.updated).slice(0, 4);
+      el.innerHTML = recent.map(n => `
+        <div class="recent-item" onclick="openNote(${n.id})">
+          <div class="recent-item-title">${n.title || 'Untitled'}</div>
+          <div class="recent-item-time">${timeAgo(n.updated)}</div>
+        </div>
+      `).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // HEATMAP
+    // ═══════════════════════════════════════
+    function buildHeatmap() {
+      const el     = document.getElementById('heatmap');
+      const levels = [0,0,1,0,2,1,0, 1,2,3,1,0,2,1, 0,1,2,4,2,1,0, 2,3,1,0,1,3,2, 1,2,4,3,2,1,0];
+      el.innerHTML = levels.map(l => `<div class="hm-cell ${l ? 'l' + l : ''}"></div>`).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // TOAST
+    // ═══════════════════════════════════════
+    function showToast(msg = 'Saved', warn = false) {
+      const t        = document.getElementById('toast');
+      t.innerHTML    = (warn ? '⚠' : '✓') + ' &nbsp;' + msg;
+      t.style.color       = warn ? 'var(--pink)' : 'var(--teal)';
+      t.style.borderColor = warn ? 'rgba(247,37,133,0.3)' : 'rgba(0,245,212,0.3)';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ═══════════════════════════════════════
+    // TIME HELPER
+    // ═══════════════════════════════════════
+    function timeAgo(ts) {
+      const diff = Date.now() - ts;
+      if (diff < 60000)    return 'just now';
+      if (diff < 3600000)  return Math.floor(diff / 60000) + 'm ago';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+      return Math.floor(diff / 86400000) + 'd ago';
+    }
+
+    // ═══════════════════════════════════════
+    // KEYBOARD SHORTCUTS
+    // ═══════════════════════════════════════
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); newNote(); }
+    });
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    buildHeatmap();
+    renderList();
+    openNote(notes[2].id);
+  </script>
+
+</body>
+</html>
