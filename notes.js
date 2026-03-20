@@ -4,7 +4,7 @@ const { body } = require('express-validator');
 const { getNotes, getNote, createNote, updateNote, deleteNote } = require('../controllers/notesController');
 const { protect } = require('../middleware/auth');
 
-// All routes protected
+// protectection middleware to ensure only authenticated users can access these routes
 router.use(protect);
 
 router.get('/', getNotes);

@@ -7,12 +7,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
+// Connect to MongoDB //
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error(err));
 
-// Note schema
+//  schema //
 const noteSchema = new mongoose.Schema({
   title:   String,
   body:    String,
@@ -21,7 +21,7 @@ const noteSchema = new mongoose.Schema({
 });
 const Note = mongoose.model('Note', noteSchema);
 
-// ── Routes ──
+// ── Routes ──//
 app.get('/api/notes', async (req, res) => {
   const notes = await Note.find().sort({ updated: -1 });
   res.json(notes);
