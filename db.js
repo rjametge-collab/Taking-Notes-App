@@ -3,10 +3,10 @@ const path = require('path');
 
 const db = new Database(path.join(__dirname, '../data/notes.db'));
 
-// Enable WAL mode for better performance
+
 db.pragma('journal_mode = WAL');
 
-// Create tables
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
