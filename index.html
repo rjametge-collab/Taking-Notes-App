@@ -9,11 +9,10 @@
 </head>
 <body>
 
-  <!-- ═══ TOPBAR ═══ -->
   <header class="topbar">
     <div class="logo">
       <div class="logo-mark">✦</div>
-      Void
+      
     </div>
     <div class="topbar-center">
       <div class="search-wrap">
@@ -30,7 +29,7 @@
 
   <div class="shell">
 
-    <!-- ═══ SIDEBAR ═══ -->
+    
     <nav class="sidebar">
       <div class="sidebar-top">
         <button class="new-note-btn" onclick="newNote()">
@@ -46,7 +45,7 @@
       </div>
     </nav>
 
-    <!-- ═══ EDITOR ═══ -->
+    
     <div class="editor-wrap">
 
       <div class="editor-toolbar">
@@ -54,8 +53,7 @@
         <button class="tb-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
         <button class="tb-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
         <div class="tb-sep"></div>
-        <button class="tb-btn" onclick="insertMd('# ')">H1</button>
-        <button class="tb-btn" onclick="insertMd('## ')">H2</button>
+      
         <button class="tb-btn" onclick="insertMd('- ')">List</button>
         <button class="tb-btn" onclick="insertMd('> ')">Quote</button>
         <button class="tb-btn" onclick="insertMd('`')">Code</button>
@@ -72,14 +70,14 @@
       </div>
 
       <div class="editor-main" id="editor-area">
-        <!-- Empty state -->
+        
         <div class="empty-state" id="empty-state">
           <div class="empty-glyph">✦</div>
           <div class="empty-title">No note selected</div>
           <div class="empty-sub">Create a new note or pick one from the sidebar</div>
         </div>
 
-        <!-- Editor fields (hidden until a note is opened) -->
+        
         <div id="editor-fields" style="display:none; flex-direction:column; flex:1;">
           <input id="note-title" type="text" placeholder="Untitled note…" oninput="onEdit()">
           <div class="editor-meta">
@@ -96,9 +94,9 @@
         <div class="status-item" id="status-lines">0 lines</div>
       </div>
 
-    </div><!-- /editor-wrap -->
+    </div>
 
-    <!-- ═══ RIGHT PANEL ═══ -->
+    
     <aside class="right-panel" id="right-panel">
 
       <div>
@@ -145,15 +143,13 @@
 
     </aside>
 
-  </div><!-- /shell -->
+  </div>
 
-  <!-- Toast notification -->
+
   <div class="toast" id="toast">✓ &nbsp;Note saved</div>
 
   <script>
-    // ═══════════════════════════════════════
-    // DATA
-    // ═══════════════════════════════════════
+    
     const TAG_CLASSES = {
       work: 'tag-work', idea: 'tag-idea',
       personal: 'tag-personal', design: 'tag-design'
