@@ -1,8 +1,8 @@
 const Note = require('../models/Note');
 const { validationResult } = require('express-validator');
 
-// @desc  Get all notes for logged-in user
-// @route GET /api/notes
+// Get all notes for logged-in user
+// GET /api/notes
 exports.getNotes = async (req, res) => {
   try {
     const { search, tag } = req.query;
@@ -26,8 +26,8 @@ exports.getNotes = async (req, res) => {
   }
 };
 
-// @desc  Get single note
-// @route GET /api/notes/:id
+// Get single note
+// GET /api/notes/:id
 exports.getNote = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
@@ -43,8 +43,8 @@ exports.getNote = async (req, res) => {
   }
 };
 
-// @desc  Create note
-// @route POST /api/notes
+// Create note
+// POST /api/notes
 exports.createNote = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -60,8 +60,8 @@ exports.createNote = async (req, res) => {
   }
 };
 
-// @desc  Update note
-// @route PUT /api/notes/:id
+// Update note
+// PUT /api/notes/:id
 exports.updateNote = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -88,8 +88,8 @@ exports.updateNote = async (req, res) => {
   }
 };
 
-// @desc  Delete note
-// @route DELETE /api/notes/:id
+// Delete note
+// DELETE /api/notes/:id
 exports.deleteNote = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
